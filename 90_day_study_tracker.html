@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>৯০ দিনের পড়াশোনা ট্র্যাকার</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans Bengali",sans-serif;background:linear-gradient(135deg,#141e30,#243b55);color:white}
+header{text-align:center;padding:25px 15px}header h1{margin:0;font-size:28px}header p{opacity:.8}
+.container{width:95%;max-width:900px;margin:auto}.progress-box{background:rgba(255,255,255,.1);padding:20px;border-radius:20px;margin-bottom:20px;backdrop-filter:blur(10px)}
+.progress-bar{width:100%;height:18px;background:#333;border-radius:20px;overflow:hidden;margin-top:10px}.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#00c6ff,#00ff87);transition:.4s}
+.day-selector{display:flex;gap:8px;overflow-x:auto;padding:10px 0 15px}.day-btn{min-width:70px;padding:10px;border:none;border-radius:12px;background:#ffffff18;color:white;cursor:pointer}.day-btn.active{background:#00c6ff;color:#000;font-weight:bold}.day-btn.done{background:#00b894}
+.day-card{background:rgba(255,255,255,.1);border-radius:22px;padding:20px;margin-bottom:30px;backdrop-filter:blur(12px)}.day-title{font-size:23px;margin-bottom:15px}
+.task{background:rgba(0,0,0,.25);padding:15px;border-radius:15px;margin:12px 0}.task-top{display:flex;align-items:center;gap:10px}.task input{width:22px;height:22px;cursor:pointer}.subject{font-size:18px;font-weight:bold}.topic{margin:8px 0;color:#ddd}.timer{font-size:27px;text-align:center;margin:12px 0;font-weight:bold}
+button{border:none;padding:9px 14px;border-radius:10px;margin:3px;cursor:pointer;font-weight:bold}.start{background:#00cec9}.pause{background:#fdcb6e}.reset{background:#ff7675}.completed{opacity:.6}.completed .topic{text-decoration:line-through}
+.navigation{display:flex;gap:10px;margin:20px 0}.nav-btn{flex:1;background:#0984e3;color:white;padding:14px}.reset-all{width:100%;background:#d63031;color:white;margin-bottom:30px}footer{text-align:center;padding:20px;opacity:.7}
+</style>
+</head>
+<body>
+<header><h1>📚 ৯০ দিনের কামব্যাক প্ল্যান</h1><p>একাদশ শ্রেণি — দ্বিতীয় সেমিস্টার</p></header>
+<div class="container">
+<div class="progress-box"><h3>📊 মোট অগ্রগতি</h3><div id="progressText">০% সম্পূর্ণ</div><div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div></div>
+<div class="day-selector" id="daySelector"></div><div id="dayContainer"></div>
+<div class="navigation"><button class="nav-btn" onclick="previousDay()">⬅️ আগের দিন</button><button class="nav-btn" onclick="nextDay()">পরের দিন ➡️</button></div>
+<button class="reset-all" onclick="resetAll()">🗑️ সব অগ্রগতি মুছে ফেলো</button>
+</div>
+<footer>💪 প্রতিদিন একটু একটু করে এগিয়ে চল — ৯০ দিন পরে তুই নিজেই পার্থক্যটা বুঝবি।</footer>
+<script>
+const subjects=["🧪 রসায়ন","📐 গণিত","⚡ পদার্থবিদ্যা","💻 কম্পিউটার বিজ্ঞান","📖 বাংলা / ইংরেজি"];
+const plans=[];for(let day=1;day<=90;day++){let phase=day<=15?"ভিত্তি শক্ত করা":day<=30?"মূল বিষয় শেখা":day<=45?"কঠিন অধ্যায়":day<=60?"প্রশ্ন অনুশীলন":day<=75?"সিলেবাস ঝালাই":"পরীক্ষার প্রস্তুতি";plans.push({day,phase})}
+let currentDay=Number(localStorage.getItem("currentDay"))||1;let progress=JSON.parse(localStorage.getItem("studyProgress"))||{};const timers={};
+function getTopic(day,i){let a;if(day<=15)a=["তাপগতিবিদ্যার প্রাথমিক ধারণা","গাণিতিক আরোহ ও দ্বিপদী উপপাদ্য","মহাকর্ষ ও কেপলারের সূত্র","ডেটা স্ট্রাকচারের পরিচয়","বাংলা/ইংরেজি পাঠ ও লিখিত অনুশীলন"];else if(day<=30)a=["হেসের সূত্র, এনথ্যালপি ও গিবস শক্তি","ধারা, শ্রেণি ও দ্বিপদী উপপাদ্য","কঠিন ও তরল পদার্থের ধর্ম","অ্যারে, স্ট্যাক ও কিউ","ব্যাকরণ ও লেখার অনুশীলন"];else if(day<=45)a=["রাসায়নিক সাম্যাবস্থা ও পিএইচ","সরলরেখা","তাপীয় ধর্ম ও ক্যালোরিমেট্রি","কম্পিউটার নেটওয়ার্ক","রচনা/প্রতিবেদন ও ইংরেজি অনুশীলন"];else if(day<=60)a=["জারণ-বিজারণ ও জৈব রসায়নের ভিত্তি","বৃত্ত ও অন্যান্য শঙ্কুজাতীয় অংশ","তাপগতিবিদ্যা ও গতিতত্ত্বের সমস্যা","কম্পিউটার নৈতিকতা ও পুনরাবৃত্তি","গুরুত্বপূর্ণ প্রশ্নের লিখিত অনুশীলন"];else if(day<=75)a=["রসায়নের সব গুরুত্বপূর্ণ প্রশ্ন পুনরাবৃত্তি","গণিতের গুরুত্বপূর্ণ অঙ্ক পুনরাবৃত্তি","পদার্থবিদ্যার সূত্র ও সংখ্যাত্মক সমস্যা","কম্পিউটার বিজ্ঞানের প্রশ্ন অনুশীলন","বাংলা/ইংরেজির গুরুত্বপূর্ণ অংশ পুনরাবৃত্তি"];else a=["রসায়নের মক পরীক্ষা ও ভুল সংশোধন","গণিতের মক পরীক্ষা ও ভুল সংশোধন","পদার্থবিদ্যার মক পরীক্ষা ও ভুল সংশোধন","কম্পিউটার বিজ্ঞানের মক পরীক্ষা","বাংলা/ইংরেজির শেষ মুহূর্তের প্রস্তুতি"];return a[i]}
+function getDefaultTime(i){return [5400,5400,4500,2700,1800][i]}
+function formatTime(s){return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+function isDayComplete(d){for(let i=0;i<5;i++){let k=`day${d}_task${i}`;if(!progress[k]||!progress[k].completed)return false}return true}
+function createDaySelector(){let s=document.getElementById("daySelector");s.innerHTML="";for(let i=1;i<=90;i++){let b=document.createElement("button");b.className="day-btn"+(i===currentDay?" active":"")+(isDayComplete(i)?" done":"");b.innerText="দিন "+i;b.onclick=()=>{currentDay=i;localStorage.setItem("currentDay",i);render()};s.appendChild(b)}}
+function renderDay(){let c=document.getElementById("dayContainer"),p=plans[currentDay-1],html=`<div class="day-card"><div class="day-title">📅 দিন ${p.day}<br><small>🎯 ${p.phase}</small></div>`;subjects.forEach((sub,i)=>{let k=`day${currentDay}_task${i}`;if(!progress[k])progress[k]={completed:false,remaining:getDefaultTime(i)};let t=progress[k];html+=`<div class="task ${t.completed?"completed":""}"><div class="task-top"><input type="checkbox" ${t.completed?"checked":""} onchange="completeTask(${i})"><span class="subject">${sub}</span></div><div class="topic">📌 ${getTopic(currentDay,i)}</div><div class="timer" id="timer-${i}">${formatTime(t.remaining)}</div><div style="text-align:center"><button class="start" onclick="startTimer(${i})">▶️ শুরু</button><button class="pause" onclick="pauseTimer(${i})">⏸️ থামাও</button><button class="reset" onclick="resetTimer(${i})">🔄 রিসেট</button></div></div>`});html+="</div>";c.innerHTML=html;localStorage.setItem("studyProgress",JSON.stringify(progress))}
+function startTimer(i){if(timers[i])return;let k=`day${currentDay}_task${i}`;timers[i]=setInterval(()=>{if(progress[k].remaining>0){progress[k].remaining--;let e=document.getElementById(`timer-${i}`);if(e)e.innerText=formatTime(progress[k].remaining);localStorage.setItem("studyProgress",JSON.stringify(progress))}else{clearInterval(timers[i]);delete timers[i];alert("⏰ সময় শেষ! কাজটি সম্পূর্ণ হলে টিক দিয়ে দাও।")}},1000)}
+function pauseTimer(i){if(timers[i]){clearInterval(timers[i]);delete timers[i]}}
+function resetTimer(i){pauseTimer(i);let k=`day${currentDay}_task${i}`;progress[k].remaining=getDefaultTime(i);document.getElementById(`timer-${i}`).innerText=formatTime(progress[k].remaining);localStorage.setItem("studyProgress",JSON.stringify(progress))}
+function completeTask(i){let k=`day${currentDay}_task${i}`;progress[k].completed=!progress[k].completed;pauseTimer(i);localStorage.setItem("studyProgress",JSON.stringify(progress));updateProgress();renderDay();createDaySelector()}
+function updateProgress(){let total=450,done=0;for(let d=1;d<=90;d++)for(let i=0;i<5;i++){let k=`day${d}_task${i}`;if(progress[k]?.completed)done++}let pct=Math.round(done/total*100);document.getElementById("progressText").innerText=`${pct}% সম্পূর্ণ — ${done}/${total} কাজ`;document.getElementById("progressFill").style.width=pct+"%"}
+function nextDay(){if(currentDay<90){currentDay++;localStorage.setItem("currentDay",currentDay);render()}}
+function previousDay(){if(currentDay>1){currentDay--;localStorage.setItem("currentDay",currentDay);render()}}
+function resetAll(){if(confirm("তুই কি সত্যিই সব অগ্রগতি মুছে ফেলতে চাস?")){Object.values(timers).forEach(clearInterval);localStorage.removeItem("studyProgress");localStorage.removeItem("currentDay");location.reload()}}
+function render(){createDaySelector();renderDay();updateProgress();window.scrollTo({top:0,behavior:"smooth"})}
+render();
+</script>
+</body>
+</html>
